@@ -1,8 +1,9 @@
-﻿/**
+/**
  * losslesspack - Zstandard Algorithm with Automatic Fallback
  * Algorithm ID: 3 (zstd) & 4 (zstd-dict)
  */
 
+import { createRequire } from "node:module";
 import { AlgorithmId } from "../format.js";
 import { AlgorithmUnavailableError } from "../errors.js";
 import { AlgorithmEngine } from "./types.js";
@@ -22,10 +23,9 @@ export function isZstdAvailable(): boolean {
     return cachedZstdModule !== null;
   }
   try {
-    // Attempt dynamic require
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require("@mongodb-js/zstd") as ZstdModule;
-    if (typeof mod.compress === "function" && typeof mod.decompress === "function") {
+    const req = createRequire(import.meta.url);
+    const mod = req("@mongodb-js/zstd") as ZstdModule;
+    if (mod && typeof mod.compress === "function" && typeof mod.decompress === "function") {
       cachedZstdModule = mod;
       return true;
     }

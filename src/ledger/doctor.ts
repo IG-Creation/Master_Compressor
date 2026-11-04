@@ -83,12 +83,12 @@ export async function runDiagnostics(targetAdapter?: StorageAdapter): Promise<Do
     { heapUsedMb, heapTotalMb, freeMemMb }
   );
 
-  // 4. Zstandard Availability Check
+  // 4. Zstandard Availability Check (Optional algorithm; automatic Brotli fallback)
   const hasZstd = isZstdAvailable();
   addCheck(
     "zstd_availability",
     "compression",
-    hasZstd,
+    true,
     hasZstd
       ? "Zstandard compression engine is available and verified"
       : "Zstandard not installed (Brotli fallback will be used automatically)"
