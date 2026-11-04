@@ -1,14 +1,17 @@
 /**
  * losslesspack - CLI Interface
- * Supports compress, decompress, verify, info, and bench with stdin/stdout piping.
+ * Supports compress, decompress, verify, info, bench, doctor, audit, and report.
  */
 
 import fs from "node:fs";
 import { promises as fsp } from "node:fs";
 import path from "node:path";
-import { compress, decompress, inspectContainer } from "./index.js";
+import { compress, decompress, inspectContainer, getAdapter, runDiagnostics } from "./index.js";
 import { AlgorithmId } from "./format.js";
 import { isZstdAvailable } from "./algorithms/zstd.js";
+import { StorageAuditor } from "./audit/auditor.js";
+import { FailureLedger } from "./ledger/ledger.js";
+import { formatTextReport, exportHtmlReport } from "./ledger/report.js";
 
 async function readStream(stream: NodeJS.ReadableStream): Promise<Buffer> {
   const chunks: Buffer[] = [];
@@ -29,6 +32,14 @@ function getAlgorithmName(id: AlgorithmId): string {
   }
 }
 
+function parseArg(args: string[], flag: string): string | undefined {
+  const idx = args.indexOf(flag);
+  if (idx !== -1 && idx + 1 < args.length) {
+    return args[idx + 1];
+  }
+  return undefined;
+}
+
 export async function runCli(argv: string[]): Promise<number> {
   const args = argv.slice(2);
   const command = args[0];
@@ -37,12 +48,18 @@ export async function runCli(argv: string[]): Promise<number> {
     console.error([
       "Usage: losslesspack <command> [options]",
       "",
-      "Commands:",
+      "Core Commands:",
       "  compress <in> <out>     Compress file or stdin (-) to container",
       "  decompress <in> <out>   Decompress container to destination or stdout (-)",
       "  verify <file>           Verify integrity and SHA-256 of container",
       "  info <file>             Inspect and display container header metadata",
-      "  bench [path]            Run benchmark on target file or synthetic dataset"
+      "  bench [path]            Run benchmark on target file or synthetic dataset",
+      "",
+      "Storage & Operational Commands:",
+      "  doctor [--adapter name] Run environment, driver, and canary diagnostics",
+      "  audit --adapter <name>  Scrub stored records and verify data integrity",
+      "                          [--sample 5%|all] [--prefix <pfx>] [--rate <rps>]",
+      "  report [--html <path>]  Display failure ledger summary or export HTML dashboard"
     ].join("\n"));
     return command ? 0 : 1;
   }
@@ -182,10 +199,97 @@ export async function runCli(argv: string[]): Promise<number> {
           (saved + "%").padEnd(10) + " | " +
           (compTime.toFixed(2) + " ms").padEnd(12) + " | " +
           (decompTime.toFixed(2) + " ms").padEnd(12) + " | " +
-          (isMatch ? "✅ MATCH" : "❌ CORRUPT")
+          (isMatch ? "MATCH" : "CORRUPT")
         );
       }
       console.log("=".repeat(75));
+      return 0;
+    }
+
+    if (command === "doctor") {
+      const adapterName = parseArg(args, "--adapter");
+      const targetAdapter = adapterName ? getAdapter(adapterName) : undefined;
+
+      console.log("Running losslesspack doctor diagnostic suite...\n");
+      const report = await runDiagnostics(targetAdapter);
+
+      for (const chk of report.checks) {
+        const mark = chk.passed ? "[OK] " : "[FAIL]";
+        console.log(`${mark} [${chk.category.toUpperCase().padEnd(11)}] ${chk.name}: ${chk.message}`);
+      }
+
+      console.log(`\nDiagnostics complete: ${report.passedChecks}/${report.totalChecks} checks passed.`);
+      return report.healthy ? 0 : 1;
+    }
+
+    if (command === "audit") {
+      const adapterName = parseArg(args, "--adapter");
+      if (!adapterName) {
+        console.error("Error: --adapter <name> is required for audit. (e.g. losslesspack audit --adapter memory)");
+        return 1;
+      }
+
+      const sampleArg = parseArg(args, "--sample") || "all";
+      let sampleRate = 1.0;
+      if (sampleArg.endsWith("%")) {
+        sampleRate = Math.max(0.01, Math.min(1.0, parseFloat(sampleArg) / 100));
+      } else if (sampleArg !== "all") {
+        sampleRate = Math.max(0.01, Math.min(1.0, parseFloat(sampleArg)));
+      }
+
+      const prefix = parseArg(args, "--prefix") || "";
+      const rateStr = parseArg(args, "--rate") || "50";
+      const rateLimitRps = parseInt(rateStr, 10);
+
+      const adapter = getAdapter(adapterName);
+      const ledger = new FailureLedger();
+      const auditor = new StorageAuditor({
+        adapter,
+        prefix,
+        sampleRate,
+        rateLimitRps,
+        ledger
+      });
+
+      console.log(`Starting audit on adapter '${adapterName}' (sample rate: ${(sampleRate * 100).toFixed(0)}%, rate limit: ${rateLimitRps} rps)...`);
+      const result = await auditor.run((p) => {
+        if (p.scanned % 100 === 0) {
+          process.stdout.write(`\rScanned: ${p.scanned} | Verified: ${p.verified} | Corrupt: ${p.corrupted} | Missing: ${p.missing}`);
+        }
+      });
+
+      console.log("\n\nAudit Completed:");
+      console.log(`  Scanned Keys  : ${result.scanned}`);
+      console.log(`  Sampled Keys  : ${result.sampled}`);
+      console.log(`  Verified Keys : ${result.verified}`);
+      console.log(`  Corrupted Keys: ${result.corrupted}`);
+      console.log(`  Missing Keys  : ${result.missing}`);
+      console.log(`  Unreadable    : ${result.unreadable}`);
+
+      if (result.failures.length > 0) {
+        console.log("\nFailures detected:");
+        for (const f of result.failures.slice(0, 10)) {
+          console.log(`  [${f.code}] Key: ${f.key} - ${f.error}`);
+        }
+        return 1;
+      }
+
+      console.log("\nAudit result: 100% HEALTHY. Zero corruption detected.");
+      return 0;
+    }
+
+    if (command === "report") {
+      const htmlPath = parseArg(args, "--html");
+      const ledger = new FailureLedger();
+      const incidents = await ledger.query();
+
+      if (htmlPath) {
+        await exportHtmlReport(incidents, path.resolve(htmlPath));
+        console.log(`Exported incident dashboard to ${htmlPath} (${incidents.length} incidents)`);
+        return 0;
+      }
+
+      console.log(formatTextReport(incidents));
       return 0;
     }
 

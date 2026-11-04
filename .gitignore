@@ -36,3 +36,7 @@ ENV/
 .DS_Store
 Thumbs.db
 Desktop.ini
+# Runtime storage and ledgers
+.losslesspack_storage/
+reports/*.jsonl
+reports/*.html

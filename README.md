@@ -1,9 +1,8 @@
-# losslesspack 🗜️⚡
+# losslesspack 📦⚡
 
-> **Production-Grade, LOSSLESS Data Compression Library & CLI for Node.js and Supabase**  
-> *Engineered for high-volume PostgreSQL `bytea` records and Supabase Storage with strict zero-data-loss guarantees.*
+> **Production-Grade, Lossless Data Compression Library, Mediator Pipeline & CLI**  
+> *Database-agnostic, self-verifying, and self-reporting with strict zero-data-loss guarantees.*
 
-[![CI Matrix Tests](https://github.com/IG-Creation/Master_Compressor/actions/workflows/test.yml/badge.svg)](https://github.com/IG-Creation/Master_Compressor/actions)
 [![TypeScript 5.x](https://img.shields.io/badge/TypeScript-Strict%205.x-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js >= 18](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
 [![Format: ESM + CJS](https://img.shields.io/badge/module-ESM%20%2B%20CJS-purple.svg)](#installation)
@@ -11,183 +10,162 @@
 
 ---
 
-## 🎯 Non-Negotiable Guarantees
+## 🛡️ Non-Negotiable Guarantees
 
 1. **Bit-Identical Roundtrip:** `decompress(compress(x))` is byte-identical to `x` for every possible input. Not a single bit may ever change.
 2. **In-Memory Self-Verification:** Every `compress()` call verifies itself by decompressing in memory and comparing SHA-256 with original input. If verification fails, it falls back to uncompressed `store` mode and never throws away the original.
-3. **No Negative Compression:** If compressed size exceeds or equals the original size, `losslesspack` automatically uses `store` mode (overhead limited to the 55-byte fixed header).
+3. **No Negative Compression:** If compressed size exceeds or equals the original size, `losslesspack` automatically uses `store` mode (overhead strictly limited to the 55-byte fixed header).
 4. **End-to-End Integrity:** Every `decompress()` call verifies both the byte length and SHA-256 digest against the header. Any mismatch throws a typed error—it will **never** return partial or corrupt data.
-5. **No Data Loss on Error Paths:** Pure functional design with zero global mutable state. Thread-safe and safe for high-concurrency environments.
-6. **Battle-Tested Algorithms:** Built on Node.js standard-library Zlib (Gzip and Brotli) as the always-available baseline, with Zstandard (`zstd`) via optional dependency and automatic graceful fallback.
+5. **Zero Data Loss on Error Paths:** Pure functional core with zero global mutable state. Concurrency-safe, retryable, with write-ahead journaling and quarantine stores.
+6. **Battle-Tested Engines:** Built on Node.js standard-library Zlib (Gzip and Brotli) as the always-available baseline, with Zstandard (`zstd`) via optional dependency (`@mongodb-js/zstd`) and automatic fallback.
 
 ---
 
-## ⚠️ Honest Reality & Compression Claims
-
-- **Compression is Data-Dependent:** Shannon information theory dictates that no lossless compression algorithm can shrink all possible inputs. Highly redundant data (JSON, server logs, CSV, telemetry, text) will compress by **60% to 95%**.
-- **Incompressible Data Won’t Shrink:** Random bytes, cryptographic ciphertexts, and already-compressed media (ZIP, GZ, PNG, JPEG, MP4, WebP, 7z) cannot be compressed further. `losslesspack` automatically detects high-entropy data and skips compression via `store` mode.
-- **SQL Filtering Caveat:** Compressed columns in PostgreSQL (`bytea`) cannot be queried with standard SQL `WHERE` clauses. Always keep filterable/indexed metadata in native columns and store only the large payloads compressed (see [docs/SUPABASE.md](docs/SUPABASE.md)).
-
----
-
-## 📦 Installation
+## 🚀 Installation
 
 ```bash
 # Core library (Zero mandatory external dependencies)
 npm install losslesspack
 
-# Optional: Install native Zstandard engine
+# Optional: Install native/wasm Zstandard engine
 npm install @mongodb-js/zstd
+
+# Optional: Install Supabase, Postgres, MySQL, Redis, Mongo, or AWS S3 drivers as needed
+npm install @supabase/supabase-js pg mysql2 ioredis mongodb @aws-sdk/client-s3
 ```
 
 ---
 
-## 🚀 Quickstart
+## ⚡ Quickstart
 
-### 1. Basic In-Memory Compression & Decompression
+### 1. In-Memory Compression & Decompression
 ```typescript
 import { compress, decompress } from "losslesspack";
 
-// Compress string or Buffer
-const data = Buffer.from("Field visit registration payload with nested telemetry...".repeat(20));
-const container = await compress(data);
+const original = Buffer.from(JSON.stringify({ user: "Alice", metrics: [1, 2, 3] }));
 
-console.log(`Original: ${data.length} B -> Container: ${container.length} B`);
+// Compresses into self-describing LLP1 envelope with SHA-256 checksum and header CRC32
+const compressed = await compress(original, { algorithm: "auto" });
 
-// Decompress with cryptographic verification
-const restored = await decompress(container);
-console.assert(restored.equals(data), "Bit-identical verification passed!");
+// Restores exact original bytes with length and SHA-256 verification
+const restored = await decompress(compressed);
+console.log(restored.equals(original)); // true
 ```
 
-### 2. Lossless Canonical JSON Roundtrip
+### 2. Canonical Lossless JSON
+Preserves JavaScript primitives that standard JSON loses (`BigInt`, `Date`, `NaN`, `Infinity`, and `Buffer`):
 ```typescript
 import { compressJSON, decompressJSON } from "losslesspack";
 
 const record = {
-  id: "rec_90124",
+  id: 1234567890123456789n, // BigInt
   timestamp: new Date("2026-11-05T00:00:00Z"),
-  balance: 9007199254740993123456789n, // BigInt support!
-  score: Number.NaN,                    // Preserves NaN, Infinity, -Infinity
-  logs: ["LOGIN_SUCCESS", "AUDIT_VERIFIED"]
+  ratio: NaN,
+  buffer: Buffer.from([0x00, 0xff, 0x42])
 };
 
 const packed = await compressJSON(record);
 const unpacked = await decompressJSON<typeof record>(packed);
 
-console.log(unpacked.balance); // 9007199254740993123456789n (Native BigInt)
+console.log(typeof unpacked.id); // "bigint"
 console.log(unpacked.timestamp instanceof Date); // true
+console.log(Number.isNaN(unpacked.ratio)); // true
 ```
 
 ---
 
-## 🗄️ Supabase & PostgreSQL Integration
+## 🏛️ Mediator Pipeline (`LosslessMediator`)
 
-Import the dedicated subpath export:
+The `LosslessMediator` is the primary entry point connecting application code to storage backends. It wraps every write in strict self-verification, write-ahead journaling (WAL), safe retries, circuit breaking, and quarantine storage.
+
 ```typescript
-import { 
-  bufferToByteaHex, 
-  byteaHexToBuffer, 
-  uploadCompressed, 
-  downloadDecompressed,
-  batchInsertCompressed,
-  readKeysetPaginated 
-} from "losslesspack/supabase";
-```
+import { LosslessMediator, getAdapter } from "losslesspack";
 
-### PostgreSQL `bytea` Column Storage
-```typescript
-import { createClient } from "@supabase/supabase-js";
-import { compress, decompress } from "losslesspack";
-import { bufferToByteaHex, byteaHexToBuffer } from "losslesspack/supabase";
-
-const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
-
-// 1. Insert compressed payload into PostgreSQL bytea column
-const rawPayload = Buffer.from(JSON.stringify(fieldVisitReport));
-const container = await compress(rawPayload);
-
-await supabase.from("field_visits").insert({
-  user_code: "FMF10892",
-  branch_name: "Kurla Branch 04",
-  visit_date: "2026-11-04T10:30:00Z",
-  payload: bufferToByteaHex(container), // Formatted as \x4c4c5031...
-  original_size: rawPayload.length,
-  compressed_size: container.length
+const adapter = getAdapter("postgres", { client: pgPool });
+const mediator = new LosslessMediator(adapter, {
+  mode: "strict", // Options: "strict" | "sampled" | "shadow" | "dry-run"
+  retries: 3
 });
 
-// 2. Read back and decompress
-const { data } = await supabase.from("field_visits").select("payload").eq("user_code", "FMF10892").single();
-const decompressed = await decompress(byteaHexToBuffer(data.payload));
+// Writes data: Compress -> Self-verify -> WAL -> Adapter Put -> Read-Back -> Verify SHA-256 -> Commit WAL
+const receipt = await mediator.write("user/profile/42", rawBuffer);
+console.log(`Saved ${(100 - receipt.ratio * 100).toFixed(1)}% space. Stored in ${receipt.adapter}`);
+
+// Read with automated integrity verification
+const data = await mediator.read("user/profile/42");
 ```
 
-### Streaming Keyset Cursor Pagination
-```typescript
-// Reads millions of rows with constant memory (no OFFSET scanning)
-for await (const row of readKeysetPaginated(supabase, "field_visits", { pageSize: 500 })) {
-  console.log("Record ID:", row.id, "Payload:", row.payload);
-}
-```
+### Mediator Modes:
+- **`strict` (Default):** Verified read-back on every single write.
+- **`sampled`:** Probabilistically verifies a percentage of writes (e.g., `sampleRate: 0.05` for high-volume pipelines).
+- **`shadow`:** Stores compressed payload alongside raw uncompressed data and verifies both during trial periods.
+- **`dry-run`:** Evaluates compression ratios and statistics without writing to the storage backend.
 
 ---
 
-## 📊 Benchmarks
+## 🔌 Database-Agnostic Storage Adapters
 
-Tested on a 67 KB repetitive JSON telemetry sample:
+`losslesspack` ships with ready-to-use storage adapters. Optional drivers are loaded lazily and throw `AdapterUnavailableError` only if instantiated without the required driver package:
 
-| Algorithm | Compressed Size | Storage Saved (%) | Compression (ms) | Decompression (ms) | Integrity Status |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Store (Raw)** | 67,763 B | -0.1% | 1.03 ms | 0.29 ms | ✅ Byte-Identical |
-| **Gzip** | 4,811 B | **92.9%** | 2.88 ms | 1.28 ms | ✅ Byte-Identical |
-| **Brotli** | 4,115 B | **93.9%** | 1.16 ms | 0.85 ms | ✅ Byte-Identical |
-| **Zstandard** | 3,920 B | **94.2%** | 0.94 ms | 0.62 ms | ✅ Byte-Identical |
+- **`memory`**: In-memory storage for high-speed unit testing.
+- **`filesystem`**: Atomic disk storage with temporary staging, fsync flush, and atomic rename.
+- **`sqlite`**: SQLite adapter supporting `better-sqlite3` and `sqlite3`.
+- **`postgres`**: PostgreSQL `bytea` storage via `pg`.
+- **`mysql`**: MySQL `LONGBLOB` storage via `mysql2`.
+- **`mongodb`**: MongoDB binary storage.
+- **`redis`**: Redis binary string storage via `ioredis`.
+- **`s3`**: AWS S3 and S3-compatible object storage via `@aws-sdk/client-s3`.
+- **`supabase`**: Unified PostgreSQL `bytea` and Supabase Storage bucket adapter.
+- **`chaos`**: Fault injection wrapper to test network drops, timeouts, bit flips, and truncated reads.
+
+### Automatic Chunk Splitting with Manifests
+All adapters inheriting from `BaseAdapter` automatically split records exceeding their `maxValueSizeBytes` into numbered chunk parts (`${key}.__llp_part__.${index}`) with an atomic manifest, verifying each chunk and the whole payload with SHA-256 hashes upon reassembly.
 
 ---
 
-## 🖥️ Command Line Interface (CLI)
+## 🔍 Data Scrubbing & Auditor CLI
+
+The `losslesspack audit` command scrubs databases to detect bit rot, corrupt headers, or truncated payloads without overloading production systems:
 
 ```bash
-# 1. Compress file (or stdin via -)
-npx losslesspack compress visit_log.json visit_log.llp1
+# Scrub all records in a Postgres adapter with rate limiting
+losslesspack audit --adapter postgres --rate 50 --prefix "telemetry/"
 
-# 2. Decompress container (or stdout via -)
-npx losslesspack decompress visit_log.llp1 restored.json
+# Sample 5% of records in S3
+losslesspack audit --adapter s3 --sample 5%
 
-# 3. Verify container integrity and SHA-256
-npx losslesspack verify visit_log.llp1
-
-# 4. Inspect container header details
-npx losslesspack info visit_log.llp1
-
-# 5. Run live benchmark
-npx losslesspack bench
+# Resume from a previous cursor
+losslesspack audit --adapter filesystem --cursor "cursor_token"
 ```
 
 ---
 
-## 🛡️ Error Handling Hierarchy
+## 📋 Failure Ledger & Incident Reporting
 
-All errors extend `LosslessPackError` with unique, machine-readable `code` properties:
+All operational anomalies (checksum mismatches, adapter timeouts, quarantine events) are recorded in `reports/failures.jsonl` and formatted into `reports/ISSUES.md`.
 
-| Error Class | Code | Cause |
-| :--- | :--- | :--- |
-| `InvalidMagicError` | `ERR_INVALID_MAGIC` | Container does not start with `"LLP1"`. |
-| `UnsupportedVersionError` | `ERR_UNSUPPORTED_VERSION` | Format version is greater than 1. |
-| `CorruptHeaderError` | `ERR_CORRUPT_HEADER` | Header CRC-32 checksum failed. |
-| `ChecksumMismatchError` | `ERR_CHECKSUM_MISMATCH` | Decompressed payload SHA-256 or length does not match header. |
-| `SizeLimitExceededError` | `ERR_SIZE_LIMIT_EXCEEDED` | Payload claims size exceeding `maxDecompressedSize` (zip-bomb defense). |
-| `TruncatedDataError` | `ERR_TRUNCATED_DATA` | Input stream ended prematurely. |
-| `AlgorithmUnavailableError` | `ERR_ALGORITHM_UNAVAILABLE` | Requested native algorithm binding is missing. |
+- **Strict Redaction:** No passwords, connection strings, JWTs, or raw payload bytes are ever stored in reports.
+- **Prompt for AI Fix:** Each issue in `reports/ISSUES.md` includes a structured prompt to diagnose root causes and generate reproducible tests.
+- **HTML Dashboard:** Export failure reports via `losslesspack report --html reports/dashboard.html`.
+
+### Diagnostics:
+```bash
+losslesspack doctor
+```
+Checks Node runtime, monotonic clock, memory headroom, installed drivers, zstd engine, filesystem permissions, and runs an end-to-end binary roundtrip canary.
 
 ---
 
-## 📚 Documentation Links
-- [Container Format Specification (docs/FORMAT.md)](docs/FORMAT.md)
-- [Supabase & PostgreSQL Architecture Guide (docs/SUPABASE.md)](docs/SUPABASE.md)
-- [Recommended PostgreSQL Migration (supabase/migrations/)](supabase/migrations/)
-- [Executable Code Examples (examples/)](examples/)
+## 📚 Documentation
+
+- [Container Format Specification (LLP1)](docs/FORMAT.md)
+- [Supabase & PostgreSQL Integration Guide](docs/SUPABASE.md)
+- [Custom Adapter Guide & Conformance Suite](docs/ADAPTERS.md)
+- [Production Operations & Quarantine Runbook](docs/OPERATIONS.md)
+- [Error Code Lookup & Troubleshooting](docs/TROUBLESHOOTING.md)
 
 ---
 
 ## 📄 License
 
-MIT License. Copyright (c) 2026 IG-Creation.
+MIT © [IG-Creation](https://github.com/IG-Creation)

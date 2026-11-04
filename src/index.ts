@@ -30,6 +30,18 @@ export * from "./stream.js";
 export * from "./file.js";
 export * from "./json.js";
 
+// Addendum modules
+export * as adapters from "./adapters/index.js";
+export * as mediator from "./mediator/index.js";
+export * as ledger from "./ledger/index.js";
+export * as audit from "./audit/index.js";
+
+export { LosslessMediator } from "./mediator/mediator.js";
+export { FailureLedger } from "./ledger/ledger.js";
+export { StorageAuditor } from "./audit/auditor.js";
+export { runDiagnostics } from "./ledger/doctor.js";
+export { getAdapter } from "./adapters/index.js";
+
 const gzipEngine = new GzipEngine();
 const brotliEngine = new BrotliEngine();
 const zstdEngine = new ZstdEngine();

@@ -1,7 +1,7 @@
 {
   "name": "losslesspack",
   "version": "1.0.0",
-  "description": "Production-grade, lossless data compression library and CLI for Node.js and Supabase.",
+  "description": "Production-grade, lossless data compression library, mediator pipeline and CLI for Node.js.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -18,6 +18,46 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./adapters": {
+      "import": {
+        "types": "./dist/adapters/index.d.ts",
+        "default": "./dist/adapters/index.js"
+      },
+      "require": {
+        "types": "./dist/adapters/index.d.cts",
+        "default": "./dist/adapters/index.cjs"
+      }
+    },
+    "./mediator": {
+      "import": {
+        "types": "./dist/mediator/index.d.ts",
+        "default": "./dist/mediator/index.js"
+      },
+      "require": {
+        "types": "./dist/mediator/index.d.cts",
+        "default": "./dist/mediator/index.cjs"
+      }
+    },
+    "./ledger": {
+      "import": {
+        "types": "./dist/ledger/index.d.ts",
+        "default": "./dist/ledger/index.js"
+      },
+      "require": {
+        "types": "./dist/ledger/index.d.cts",
+        "default": "./dist/ledger/index.cjs"
+      }
+    },
+    "./audit": {
+      "import": {
+        "types": "./dist/audit/index.d.ts",
+        "default": "./dist/audit/index.js"
+      },
+      "require": {
+        "types": "./dist/audit/index.d.cts",
+        "default": "./dist/audit/index.cjs"
       }
     },
     "./supabase": {
@@ -54,6 +94,8 @@
     "gzip",
     "brotli",
     "zstd",
+    "storage-adapter",
+    "mediator",
     "supabase",
     "postgres",
     "bytea",

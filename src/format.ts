@@ -1,4 +1,4 @@
-﻿/**
+/**
  * losslesspack - Container Format & Header Serialization
  * Version 1 (LLP1) binary header packing and unpacking with CRC32.
  */
@@ -28,14 +28,27 @@ export enum HeaderFlags {
   CHUNKED_STREAM = 0x02
 }
 
+export function algoIdToName(id: AlgorithmId): string {
+  switch (id) {
+    case AlgorithmId.STORE: return "store";
+    case AlgorithmId.GZIP: return "gzip";
+    case AlgorithmId.BROTLI: return "brotli";
+    case AlgorithmId.ZSTD: return "zstd";
+    case AlgorithmId.ZSTD_DICT: return "zstd-dict";
+    default: return `unknown(${id})`;
+  }
+}
+
 export interface ContainerHeader {
   magic: string;
   version: number;
   algorithmId: AlgorithmId;
+  algorithmName: string;
   flags: number;
   dictionaryId: number;
   originalLength: bigint;
   sha256: Buffer;
+  sha256Hex: string;
   crc32: number;
 }
 
@@ -135,15 +148,20 @@ export function unpackHeader(buf: Buffer | Uint8Array): ContainerHeader {
   const dictionaryId = b.readUInt32BE(7);
   const originalLength = b.readBigUInt64BE(11);
   const sha256 = Buffer.from(b.subarray(19, 51));
+  const sha256Hex = sha256.toString("hex");
 
   return {
     magic: "LLP1",
     version,
     algorithmId,
+    algorithmName: algoIdToName(algorithmId),
     flags,
     dictionaryId,
     originalLength,
     sha256,
+    sha256Hex,
     crc32: expectedCrc
   };
 }
+
+export const parseHeader = unpackHeader;

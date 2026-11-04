@@ -1,4 +1,4 @@
-﻿/**
+/**
  * losslesspack - Typed Error Hierarchy
  * Strict typed errors with unique, stable machine-readable error codes.
  */
@@ -10,6 +10,13 @@ export abstract class LosslessPackError extends Error {
     super(message);
     this.name = this.constructor.name;
     Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+export class InvalidArgumentError extends LosslessPackError {
+  readonly code = "ERR_INVALID_ARGUMENT";
+  constructor(message: string) {
+    super(message);
   }
 }
 
