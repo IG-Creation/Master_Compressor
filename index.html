@@ -1,0 +1,486 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Compressor 🗜️⚡ | Universal Data Compression & Database Engine</title>
+  <meta name="description" content="Compress any type of data and store it in your database using minimal storage. High-performance universal compression engine.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-logo-icon">🗜️</div>
+      <div class="brand-text">
+        <span class="brand-title">Master Compressor</span>
+        <span class="brand-badge">v1.0.0</span>
+      </div>
+    </div>
+    <div class="nav-metrics">
+      <div class="metric-pill">
+        <span class="pill-dot green"></span>
+        <span class="pill-label">Engine:</span>
+        <span class="pill-val">Adaptive Core Ready</span>
+      </div>
+      <div class="metric-pill">
+        <span class="pill-label">Typical Savings:</span>
+        <span class="pill-val highlight">60% - 95%</span>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button id="themeToggleBtn" class="btn-icon" title="Toggle Theme">🌓</button>
+      <a href="https://github.com/IG-Creation/Master_Compressor" target="_blank" class="btn-github">
+        <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+        </svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-tag">⚡ Ultra High-Efficiency Universal Data Engine</div>
+      <h1>Compress Any Data Type.<br><span class="gradient-text">Store in Database with Minimal Storage.</span></h1>
+      <p class="hero-subtext">
+        Automatic entropy analysis, smart algorithm auto-selection (Zstd, Brotli, Gzip, WebP, RLE-Delta), self-describing tamper-evident envelope, and transparent database integration.
+      </p>
+    </div>
+    <div class="hero-kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">💾</div>
+        <div class="kpi-body">
+          <div class="kpi-num" id="heroSavedPct">82.4%</div>
+          <div class="kpi-label">Avg Storage Reduction</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-body">
+          <div class="kpi-num" id="heroThroughput">150+ MB/s</div>
+          <div class="kpi-label">Decompression Speed</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🛡️</div>
+        <div class="kpi-body">
+          <div class="kpi-num">CRC32</div>
+          <div class="kpi-label">Lossless Tamper Proof</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🗄️</div>
+        <div class="kpi-body">
+          <div class="kpi-num">Zero-Loss</div>
+          <div class="kpi-label">Database Plug & Play</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation Tabs -->
+  <nav class="tabs-nav">
+    <button class="tab-btn active" data-tab="tab-compressor">🗜️ Live Compression Studio</button>
+    <button class="tab-btn" data-tab="tab-database">🗄️ Database Storage Lab</button>
+    <button class="tab-btn" data-tab="tab-benchmarks">📊 Algorithm Benchmark Arena</button>
+    <button class="tab-btn" data-tab="tab-roi">💰 Cloud Storage ROI Calculator</button>
+    <button class="tab-btn" data-tab="tab-docs">💻 Code & API Integration</button>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-content">
+    
+    <!-- TAB 1: LIVE COMPRESSION STUDIO -->
+    <section id="tab-compressor" class="tab-pane active">
+      <div class="studio-grid">
+        <!-- Input Column -->
+        <div class="card panel-input">
+          <div class="card-header">
+            <h3>📥 Input Payload</h3>
+            <div class="input-mode-toggle">
+              <button id="modeTextBtn" class="pill-btn active">Text / JSON</button>
+              <button id="modeFileBtn" class="pill-btn">File / Image / Media</button>
+            </div>
+          </div>
+          
+          <div class="card-body">
+            <!-- Text/JSON Mode -->
+            <div id="textInputContainer">
+              <div class="editor-toolbar">
+                <button class="btn-xs" id="sampleJsonBtn">Load Sample JSON</button>
+                <button class="btn-xs" id="sampleLogBtn">Load Telemetry Logs</button>
+                <button class="btn-xs" id="sampleNumbersBtn">Load Numeric Series</button>
+                <button class="btn-xs" id="clearInputBtn">Clear</button>
+              </div>
+              <textarea id="inputText" placeholder="Paste JSON, log text, tabular data, or arbitrary strings here..." rows="12"></textarea>
+            </div>
+
+            <!-- File Upload Mode -->
+            <div id="fileInputContainer" class="hidden">
+              <div id="dropZone" class="drop-zone">
+                <div class="drop-zone-icon">📁</div>
+                <div class="drop-zone-text">Drag & drop any file here, or <span class="browse-link">browse</span></div>
+                <div class="drop-zone-hint">Supports Images (PNG, JPG, WebP), JSON, CSV, PDF, Blobs up to 50MB</div>
+                <input type="file" id="filePicker" class="hidden">
+              </div>
+              <div id="fileInfoBox" class="file-info-box hidden">
+                <span class="file-name" id="fileNameLabel">-</span>
+                <span class="file-size" id="fileSizeLabel">-</span>
+                <button id="removeFileBtn" class="btn-icon-xs">✕</button>
+              </div>
+              <!-- Image Tuning Controls (only for images) -->
+              <div id="imageTuningControls" class="tuning-box hidden">
+                <div class="tuning-header">🖼️ Image Compression Tuner</div>
+                <div class="control-row">
+                  <label for="imgQuality">Quality (<span id="qualityVal">75</span>%):</label>
+                  <input type="range" id="imgQuality" min="10" max="95" value="75">
+                </div>
+                <div class="control-row">
+                  <label for="imgMaxDim">Max Dimension (<span id="dimVal">1280</span>px):</label>
+                  <input type="range" id="imgMaxDim" min="400" max="2560" step="100" value="1280">
+                </div>
+              </div>
+            </div>
+
+            <!-- Algorithm Settings -->
+            <div class="algo-config-box">
+              <label for="algoSelect">Compression Engine:</label>
+              <select id="algoSelect" class="form-select">
+                <option value="adaptive" selected>⚡ Adaptive Smart Selection (Recommended)</option>
+                <option value="deflate">Deflate / Zlib (Fast & Balanced)</option>
+                <option value="gzip">Gzip (Web Standard)</option>
+                <option value="image_webp">Canvas WebP / JPEG (Images)</option>
+                <option value="rle_delta">RLE + Delta (Time Series / Metrics)</option>
+              </select>
+            </div>
+
+            <button id="executeCompressBtn" class="btn-primary w-100">
+              <span>🗜️ Compress Now</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Output & Analytics Column -->
+        <div class="card panel-output">
+          <div class="card-header">
+            <h3>⚡ Compression Analytics</h3>
+            <span class="badge" id="algoUsedBadge">Idle</span>
+          </div>
+          <div class="card-body">
+            <!-- Results Meter Grid -->
+            <div class="results-grid">
+              <div class="result-tile highlight">
+                <div class="tile-label">Space Saved</div>
+                <div class="tile-val" id="resSavedPct">0%</div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar-fill" id="resSavedBar" style="width: 0%"></div>
+                </div>
+              </div>
+              <div class="result-tile">
+                <div class="tile-label">Original Size</div>
+                <div class="tile-val" id="resOrigSize">0 B</div>
+              </div>
+              <div class="result-tile">
+                <div class="tile-label">Compressed Size</div>
+                <div class="tile-val" id="resCompSize">0 B</div>
+              </div>
+              <div class="result-tile">
+                <div class="tile-label">Compression Latency</div>
+                <div class="tile-val" id="resDuration">0.0 ms</div>
+              </div>
+            </div>
+
+            <!-- Visual Preview Tab / Output -->
+            <div class="preview-box">
+              <div class="preview-tabs">
+                <button class="preview-tab-btn active" data-ptab="preview-envelope">Envelope Details</button>
+                <button class="preview-tab-btn" data-ptab="preview-visual">Visual Preview</button>
+              </div>
+              <div id="preview-envelope" class="ptab-content active">
+                <div class="meta-row"><span class="k">Magic:</span><span class="v mono" id="metaMagic">MC01</span></div>
+                <div class="meta-row"><span class="k">Algorithm:</span><span class="v" id="metaAlgo">-</span></div>
+                <div class="meta-row"><span class="k">CRC32 Checksum:</span><span class="v mono" id="metaChecksum">-</span></div>
+                <div class="meta-row"><span class="k">Ratio:</span><span class="v" id="metaRatio">-</span></div>
+                <div class="meta-row"><span class="k">Lossless Verified:</span><span class="v status-pass" id="metaLossless">Ready</span></div>
+              </div>
+              <div id="preview-visual" class="ptab-content">
+                <div id="imageCompareContainer" class="img-compare-container hidden">
+                  <div class="img-wrapper">
+                    <span>Original</span>
+                    <img id="imgPreviewOrig" alt="Original Preview">
+                  </div>
+                  <div class="img-wrapper">
+                    <span>Compressed</span>
+                    <img id="imgPreviewComp" alt="Compressed Preview">
+                  </div>
+                </div>
+                <div id="textDecompPreview" class="text-preview">
+                  <pre id="decompressedTextOutput">// Decompressed output will appear here after verification</pre>
+                </div>
+              </div>
+            </div>
+
+            <!-- Output Actions -->
+            <div class="output-actions">
+              <button id="downloadCompBtn" class="btn-secondary" disabled>💾 Download (.mc)</button>
+              <button id="verifyLosslessBtn" class="btn-outline" disabled>✅ Verify Lossless Roundtrip</button>
+              <button id="saveToDbBtn" class="btn-accent" disabled>🗄️ Save to Database</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: DATABASE STORAGE LAB -->
+    <section id="tab-database" class="tab-pane">
+      <div class="db-lab-container">
+        <!-- DB Controls & Summary -->
+        <div class="card db-summary-card">
+          <div class="card-header">
+            <h3>🗄️ In-Browser Database Engine (IndexedDB + Storage Quota)</h3>
+            <div class="db-toggle-box">
+              <label class="switch-label">
+                <input type="checkbox" id="dbCompressionToggle" checked>
+                <span class="switch-slider"></span>
+                <span class="switch-text">Transparent Compression</span>
+              </label>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="db-stats-row">
+              <div class="db-stat-item">
+                <span class="db-stat-title">Stored Records</span>
+                <span class="db-stat-num" id="dbRecordCount">0</span>
+              </div>
+              <div class="db-stat-item">
+                <span class="db-stat-title">Uncompressed Raw Volume</span>
+                <span class="db-stat-num" id="dbRawVolume">0 KB</span>
+              </div>
+              <div class="db-stat-item">
+                <span class="db-stat-title">Actual Disk/DB Usage</span>
+                <span class="db-stat-num highlight" id="dbStoredVolume">0 KB</span>
+              </div>
+              <div class="db-stat-item">
+                <span class="db-stat-title">Total Storage Saved</span>
+                <span class="db-stat-num green" id="dbTotalSaved">0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Record & Record List Grid -->
+        <div class="db-grid">
+          <!-- Add Record Form -->
+          <div class="card">
+            <div class="card-header">
+              <h4>➕ Insert Database Record</h4>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label>Record Primary Key (ID):</label>
+                <input type="text" id="dbInputKey" class="form-control" placeholder="e.g. user_session_4091">
+              </div>
+              <div class="form-group">
+                <label>Data Payload (Text / JSON):</label>
+                <textarea id="dbInputValue" class="form-control" rows="6" placeholder="Enter data payload to store..."></textarea>
+              </div>
+              <button id="dbInsertBtn" class="btn-primary w-100">💾 Insert Into Compressed Table</button>
+              <button id="dbSeedSampleBtn" class="btn-outline w-100 mt-2">⚡ Populate 25 Realistic Telemetry Rows</button>
+            </div>
+          </div>
+
+          <!-- Stored Records Table -->
+          <div class="card">
+            <div class="card-header">
+              <h4>📋 Database Records Explorer</h4>
+              <button id="dbClearAllBtn" class="btn-danger-xs">Clear Table</button>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="db-table">
+                  <thead>
+                    <tr>
+                      <th>Key / ID</th>
+                      <th>Raw Size</th>
+                      <th>DB Stored</th>
+                      <th>Savings</th>
+                      <th>Algorithm</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dbTableBody">
+                    <tr><td colspan="6" class="text-center text-muted">No records stored yet. Insert one above!</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: ALGORITHM BENCHMARK ARENA -->
+    <section id="tab-benchmarks" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h3>📊 Real-Time Algorithm Arena</h3>
+          <div class="benchmark-actions">
+            <button id="runArenaBtn" class="btn-primary">⚡ Run Live Benchmark</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="text-muted">
+            Tests each compression algorithm against standard industry datasets (repetitive JSON, system telemetry logs, numeric sensor series, mixed text).
+          </p>
+
+          <div class="arena-results-table">
+            <table class="db-table">
+              <thead>
+                <tr>
+                  <th>Algorithm</th>
+                  <th>Original Size</th>
+                  <th>Compressed Size</th>
+                  <th>Storage Reduction (%)</th>
+                  <th>Compression Speed</th>
+                  <th>Lossless Roundtrip</th>
+                </tr>
+              </thead>
+              <tbody id="arenaTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: ROI CALCULATOR -->
+    <section id="tab-roi" class="tab-pane">
+      <div class="card roi-card">
+        <div class="card-header">
+          <h3>💰 Database Storage Cost & ROI Calculator</h3>
+        </div>
+        <div class="card-body">
+          <div class="roi-grid">
+            <div class="roi-inputs">
+              <div class="form-group">
+                <label>Monthly Ingested Data Volume (GB):</label>
+                <input type="number" id="roiDataGb" class="form-control" value="500" min="10" max="100000">
+              </div>
+              <div class="form-group">
+                <label>Cloud Database Provider:</label>
+                <select id="roiProvider" class="form-select">
+                  <option value="rds">AWS RDS Aurora PostgreSQL/MySQL ($0.10/GB-mo + $0.20/IOPS)</option>
+                  <option value="atlas">MongoDB Atlas Dedicated Cluster ($0.25/GB-mo)</option>
+                  <option value="gcp">Google Cloud SQL ($0.17/GB-mo)</option>
+                  <option value="s3">AWS S3 Standard Object Storage ($0.023/GB-mo)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Retention Period:</label>
+                <select id="roiRetention" class="form-select">
+                  <option value="12">12 Months (1 Year)</option>
+                  <option value="24">24 Months (2 Years)</option>
+                  <option value="36">36 Months (3 Years)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="roi-results-box">
+              <div class="roi-result-header">Estimated Financial Savings</div>
+              <div class="roi-big-metric">
+                <span class="currency">$</span><span id="roiAnnualSavings">0</span>
+                <span class="subtext">/ year saved</span>
+              </div>
+              <div class="roi-breakdown">
+                <div class="roi-stat-row">
+                  <span>Raw Annual Storage Volume:</span>
+                  <span id="roiRawVol">6,000 GB</span>
+                </div>
+                <div class="roi-stat-row">
+                  <span>With Master Compressor (~80% saved):</span>
+                  <span id="roiCompVol" class="highlight">1,200 GB</span>
+                </div>
+                <div class="roi-stat-row">
+                  <span>Total Disk Space Freed:</span>
+                  <span id="roiDiskFreed" class="green">4,800 GB</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: DEVELOPER CODE INTEGRATION -->
+    <section id="tab-docs" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h3>💻 Developer Integration Guide</h3>
+        </div>
+        <div class="card-body">
+          <div class="docs-section">
+            <h4>🐍 Python Quickstart</h4>
+            <pre class="code-block"><code>from master_compressor import MasterCompressor, compress_json, decompress_json
+from master_compressor.database import SQLiteCompressedStore
+
+# 1. High-Performance JSON & Data Compression
+payload = {"user_id": 1024, "event": "ORDER_PLACED", "items": ["sku_1", "sku_2"]}
+result = compress_json(payload)
+print(f"Space Saved: {result.savings_ratio}% | Algorithm: {result.algorithm}")
+
+# 2. Lossless Decompression with CRC32 Verification
+restored = decompress_json(result.data)
+
+# 3. Transparent Database Storage
+db = SQLiteCompressedStore("analytics.db")
+db.store("order_1024", payload)
+order = db.retrieve("order_1024")
+print("Database stats:", db.get_stats())</code></pre>
+          </div>
+
+          <div class="docs-section mt-4">
+            <h4>⚡ Command Line Interface (CLI)</h4>
+            <pre class="code-block"><code># Compress file with adaptive smart algorithm
+python run.py compress server.log -o server.log.mc
+
+# Decompress file
+python run.py decompress server.log.mc -o restored.log
+
+# Run algorithm throughput & ratio benchmarks
+python run.py --bench 100
+
+# Run full automated test suite
+python run.py --test
+
+# Start microservice REST API
+python run.py --serve 8080</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-left">
+      <span>Built with ❤️ by <a href="https://github.com/IG-Creation" target="_blank">IG-Creation</a></span>
+      <span class="footer-dot">•</span>
+      <span>Master Compressor v1.0.0</span>
+    </div>
+    <div class="footer-right">
+      <a href="https://github.com/IG-Creation/Master_Compressor" target="_blank">Repository</a>
+      <span class="footer-dot">•</span>
+      <a href="https://github.com/IG-Creation/Master_Compressor/blob/main/LICENSE" target="_blank">MIT License</a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+﻿# Master Compressor Dependencies
+# Core algorithms and SQLite database engine run on standard library with ZERO external dependencies!
+# Optional performance and format enhancements:
+# brotli>=1.0.9
+# zstandard>=0.21.0
+# pillow>=9.0.0
