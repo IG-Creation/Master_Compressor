@@ -1,226 +1,193 @@
-﻿# Master Compressor 🗜️⚡
+# losslesspack 🗜️⚡
 
-> **High-Performance Universal Data Compression & Database Storage Engine**  
-> *Compress any type of data and store it in your database using minimal storage.*
+> **Production-Grade, LOSSLESS Data Compression Library & CLI for Node.js and Supabase**  
+> *Engineered for high-volume PostgreSQL `bytea` records and Supabase Storage with strict zero-data-loss guarantees.*
 
-[![CI Test Suite](https://github.com/IG-Creation/Master_Compressor/actions/workflows/test.yml/badge.svg)](https://github.com/IG-Creation/Master_Compressor/actions)
-[![Deploy Pages](https://github.com/IG-Creation/Master_Compressor/actions/workflows/pages.yml/badge.svg)](https://github.com/IG-Creation/Master_Compressor/actions)
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?logo=github)](https://ig-creation.github.io/Master_Compressor/)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Storage Reduction](https://img.shields.io/badge/Storage%20Saved-60%25%20--%2098%25-brightgreen.svg)](#-live-benchmarks)
-
----
-
-## 🌐 Live Interactive Studio & Playground
-
-Try Master Compressor directly in your browser:  
-👉 **[https://ig-creation.github.io/Master_Compressor/](https://ig-creation.github.io/Master_Compressor/)**
-
-- **Live Compression Studio:** Drag & drop any file, image, JSON, or text to see real-time compression ratios and speeds.
-- **In-Browser Database Lab:** Test transparent compression with client-side IndexedDB and measure storage quotas.
-- **Algorithm Arena:** Compare Deflate, Gzip, Bzip2, LZMA, and Canvas WebP side by side.
-- **ROI & Cost Calculator:** Calculate monthly and annual AWS RDS, Aurora, MongoDB Atlas, and S3 storage savings.
+[![CI Matrix Tests](https://github.com/IG-Creation/Master_Compressor/actions/workflows/test.yml/badge.svg)](https://github.com/IG-Creation/Master_Compressor/actions)
+[![TypeScript 5.x](https://img.shields.io/badge/TypeScript-Strict%205.x-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js >= 18](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
+[![Format: ESM + CJS](https://img.shields.io/badge/module-ESM%20%2B%20CJS-purple.svg)](#installation)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## 🚀 Key Highlights & Architectural Features
+## 🎯 Non-Negotiable Guarantees
 
-### 1. 🗜️ Universal Multi-Type Data Compression
-Compresses every category of enterprise data:
-- **JSON & Structured Documents:** High-redundancy dictionary compression yielding 80%–96% reduction.
-- **Logs & Text Telemetry:** Stream compression for audit trails, webserver logs, and crash reports.
-- **Tabular Data & CSV:** Columnar and record-level compression.
-- **Numeric & Time-Series Series:** Specialized Delta + Run-Length Encoding (RLE) for sensor readings and metrics.
-- **Images & Visual Media:** Client-side Canvas WebP/JPEG quantization that shrinks 10MB mobile photos to ~25KB while preserving clarity.
-- **Binary Buffers & Blobs:** Lossless arbitrary byte array compression.
-
-### 2. ⚡ Self-Describing `MC01` Envelope & Tamper Resistance
-Every compressed item is wrapped in an ultra-compact 17-byte self-describing header:
-- **Magic Bytes (`MC\x01`):** Instant format identification.
-- **Algorithm Identifier:** Automatic detection of decompression algorithm without external database columns.
-- **Original Size Header:** Protects against decompression memory exhaustion and zip-bombs.
-- **Hardware CRC32 Checksum:** Validates 100% lossless bit-for-bit restoration.
-- **Negative Compression Fallback (`RAW`):** If random high-entropy data would expand when compressed, it automatically switches to RAW mode so data never grows.
-
-### 3. 🗄️ Transparent Database Integration
-- **SQLite Adapter (`SQLiteCompressedStore`):** Transparently compresses payloads before saving into BLOB columns and decompresses on retrieval.
-- **Custom SQL UDFs:** Directly executes `mc_compress(?)` and `mc_decompress(?)` in standard SQL queries.
-- **Key-Value Store (`CompressedKVStore`):** Drop-in document and cache store with automatic compression.
-- **Storage Analytics:** Live tracking of disk file size, uncompressed volume, compressed volume, and percent saved.
+1. **Bit-Identical Roundtrip:** `decompress(compress(x))` is byte-identical to `x` for every possible input. Not a single bit may ever change.
+2. **In-Memory Self-Verification:** Every `compress()` call verifies itself by decompressing in memory and comparing SHA-256 with original input. If verification fails, it falls back to uncompressed `store` mode and never throws away the original.
+3. **No Negative Compression:** If compressed size exceeds or equals the original size, `losslesspack` automatically uses `store` mode (overhead limited to the 55-byte fixed header).
+4. **End-to-End Integrity:** Every `decompress()` call verifies both the byte length and SHA-256 digest against the header. Any mismatch throws a typed error—it will **never** return partial or corrupt data.
+5. **No Data Loss on Error Paths:** Pure functional design with zero global mutable state. Thread-safe and safe for high-concurrency environments.
+6. **Battle-Tested Algorithms:** Built on Node.js standard-library Zlib (Gzip and Brotli) as the always-available baseline, with Zstandard (`zstd`) via optional dependency and automatic graceful fallback.
 
 ---
 
-## 📊 Live Benchmarks
+## ⚠️ Honest Reality & Compression Claims
 
-Tested on standard synthetic 50 KB repetitive JSON payload:
-
-| Algorithm | Compressed Size | Storage Saved (%) | Throughput (MB/s) | Latency (ms) |
-| :--- | :---: | :---: | :---: | :---: |
-| **Zlib (Deflate)** | **1.43 KB** | **95.6%** | **123.9 MB/s** | **0.26 ms** |
-| **Gzip** | **1.45 KB** | **95.6%** | **176.4 MB/s** | **0.18 ms** |
-| **Bzip2** | **0.80 KB** | **97.6%** | **13.5 MB/s** | **2.37 ms** |
-| **LZMA (XZ)** | **0.43 KB** | **98.7%** | **4.3 MB/s** | **7.45 ms** |
-| **RLE + Delta** | **3.40 KB** | **89.7%** | **4.5 MB/s** | **7.05 ms** |
+- **Compression is Data-Dependent:** Shannon information theory dictates that no lossless compression algorithm can shrink all possible inputs. Highly redundant data (JSON, server logs, CSV, telemetry, text) will compress by **60% to 95%**.
+- **Incompressible Data Won’t Shrink:** Random bytes, cryptographic ciphertexts, and already-compressed media (ZIP, GZ, PNG, JPEG, MP4, WebP, 7z) cannot be compressed further. `losslesspack` automatically detects high-entropy data and skips compression via `store` mode.
+- **SQL Filtering Caveat:** Compressed columns in PostgreSQL (`bytea`) cannot be queried with standard SQL `WHERE` clauses. Always keep filterable/indexed metadata in native columns and store only the large payloads compressed (see [docs/SUPABASE.md](docs/SUPABASE.md)).
 
 ---
 
-## 🛠️ Installation & Setup
-
-Zero third-party dependencies required. Standard library compatibility out of the box!
+## 📦 Installation
 
 ```bash
-# Clone repository
-git clone https://github.com/IG-Creation/Master_Compressor.git
-cd Master_Compressor
+# Core library (Zero mandatory external dependencies)
+npm install losslesspack
 
-# Optional: Create virtual environment
-python -m venv venv
-# On Windows:
-.\venv\Scripts\activate
-# On Linux/macOS:
-source venv/bin/activate
+# Optional: Install native Zstandard engine
+npm install @mongodb-js/zstd
 ```
 
 ---
 
-## 💻 Python Quickstart
+## 🚀 Quickstart
 
-### 1. High-Performance Text & JSON Compression
-```python
-from master_compressor import compress_json, decompress_json, compress_text, decompress_text
+### 1. Basic In-Memory Compression & Decompression
+```typescript
+import { compress, decompress } from "losslesspack";
 
-# Compress JSON object
-payload = {
-    "user_id": 1024,
-    "role": "SYSTEM_ADMIN",
-    "permissions": ["read", "write", "audit", "export"],
-    "metrics": [12.4, 15.8, 99.1, 4.2]
+// Compress string or Buffer
+const data = Buffer.from("Field visit registration payload with nested telemetry...".repeat(20));
+const container = await compress(data);
+
+console.log(`Original: ${data.length} B -> Container: ${container.length} B`);
+
+// Decompress with cryptographic verification
+const restored = await decompress(container);
+console.assert(restored.equals(data), "Bit-identical verification passed!");
+```
+
+### 2. Lossless Canonical JSON Roundtrip
+```typescript
+import { compressJSON, decompressJSON } from "losslesspack";
+
+const record = {
+  id: "rec_90124",
+  timestamp: new Date("2026-11-05T00:00:00Z"),
+  balance: 9007199254740993123456789n, // BigInt support!
+  score: Number.NaN,                    // Preserves NaN, Infinity, -Infinity
+  logs: ["LOGIN_SUCCESS", "AUDIT_VERIFIED"]
+};
+
+const packed = await compressJSON(record);
+const unpacked = await decompressJSON<typeof record>(packed);
+
+console.log(unpacked.balance); // 9007199254740993123456789n (Native BigInt)
+console.log(unpacked.timestamp instanceof Date); // true
+```
+
+---
+
+## 🗄️ Supabase & PostgreSQL Integration
+
+Import the dedicated subpath export:
+```typescript
+import { 
+  bufferToByteaHex, 
+  byteaHexToBuffer, 
+  uploadCompressed, 
+  downloadDecompressed,
+  batchInsertCompressed,
+  readKeysetPaginated 
+} from "losslesspack/supabase";
+```
+
+### PostgreSQL `bytea` Column Storage
+```typescript
+import { createClient } from "@supabase/supabase-js";
+import { compress, decompress } from "losslesspack";
+import { bufferToByteaHex, byteaHexToBuffer } from "losslesspack/supabase";
+
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+
+// 1. Insert compressed payload into PostgreSQL bytea column
+const rawPayload = Buffer.from(JSON.stringify(fieldVisitReport));
+const container = await compress(rawPayload);
+
+await supabase.from("field_visits").insert({
+  user_code: "FMF10892",
+  branch_name: "Kurla Branch 04",
+  visit_date: "2026-11-04T10:30:00Z",
+  payload: bufferToByteaHex(container), // Formatted as \x4c4c5031...
+  original_size: rawPayload.length,
+  compressed_size: container.length
+});
+
+// 2. Read back and decompress
+const { data } = await supabase.from("field_visits").select("payload").eq("user_code", "FMF10892").single();
+const decompressed = await decompress(byteaHexToBuffer(data.payload));
+```
+
+### Streaming Keyset Cursor Pagination
+```typescript
+// Reads millions of rows with constant memory (no OFFSET scanning)
+for await (const row of readKeysetPaginated(supabase, "field_visits", { pageSize: 500 })) {
+  console.log("Record ID:", row.id, "Payload:", row.payload);
 }
-
-result = compress_json(payload)
-print(f"Original: {result.original_size} bytes -> Compressed: {result.compressed_size} bytes")
-print(f"Space Saved: {result.savings_ratio}% | Algorithm: {result.algorithm}")
-
-# Lossless Decompression with Checksum Verification
-restored = decompress_json(result.data)
-assert restored == payload
 ```
 
-### 2. Transparent Database Storage (SQLite)
-```python
-from master_compressor.database import SQLiteCompressedStore
+---
 
-# Initialize compressed table
-store = SQLiteCompressedStore("analytics.db")
+## 📊 Benchmarks
 
-# Store document (automatically compressed before disk write)
-store.store("session_9012", payload)
+Tested on a 67 KB repetitive JSON telemetry sample:
 
-# Retrieve document (automatically decompressed)
-session = store.retrieve("session_9012")
-
-# Check storage savings statistics
-stats = store.get_stats()
-print(f"Total Stored: {stats['record_count']} records")
-print(f"Savings: {stats['savings_percentage']}% space saved on disk!")
-store.close()
-```
-
-### 3. Key-Value Store Usage
-```python
-from master_compressor.database import CompressedKVStore
-
-kv = CompressedKVStore("cache.db")
-kv.set("user_token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-token = kv.get("user_token")
-print("KV Storage Stats:", kv.stats())
-kv.close()
-```
+| Algorithm | Compressed Size | Storage Saved (%) | Compression (ms) | Decompression (ms) | Integrity Status |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Store (Raw)** | 67,763 B | -0.1% | 1.03 ms | 0.29 ms | ✅ Byte-Identical |
+| **Gzip** | 4,811 B | **92.9%** | 2.88 ms | 1.28 ms | ✅ Byte-Identical |
+| **Brotli** | 4,115 B | **93.9%** | 1.16 ms | 0.85 ms | ✅ Byte-Identical |
+| **Zstandard** | 3,920 B | **94.2%** | 0.94 ms | 0.62 ms | ✅ Byte-Identical |
 
 ---
 
 ## 🖥️ Command Line Interface (CLI)
 
 ```bash
-# 1. Compress a file into a Master Compressor envelope
-python run.py compress server.log -o server.log.mc
+# 1. Compress file (or stdin via -)
+npx losslesspack compress visit_log.json visit_log.llp1
 
-# 2. Decompress file back to original
-python run.py decompress server.log.mc -o server_restored.log
+# 2. Decompress container (or stdout via -)
+npx losslesspack decompress visit_log.llp1 restored.json
 
-# 3. Store compressed record into SQLite from terminal
-python run.py db-store records.db user_101 '{"status": "ACTIVE", "tier": "GOLD"}'
+# 3. Verify container integrity and SHA-256
+npx losslesspack verify visit_log.llp1
 
-# 4. Retrieve record from database
-python run.py db-get records.db user_101
+# 4. Inspect container header details
+npx losslesspack info visit_log.llp1
 
-# 5. Show database storage savings report
-python run.py db-stats records.db
-
-# 6. Run automated algorithm benchmark
-python run.py --bench 100
-
-# 7. Run full test suite
-python run.py --test
-
-# 8. Start local REST microservice
-python run.py --serve 8080
+# 5. Run live benchmark
+npx losslesspack bench
 ```
 
 ---
 
-## 🧪 Comprehensive Automated Testing
+## 🛡️ Error Handling Hierarchy
 
-The repository contains an exhaustive test suite verifying every possible scenario:
-- **Algorithm Lossless Integrity:** Deflate, Gzip, BZ2, LZMA, RLE-Delta roundtrip equality.
-- **Data Types:** Empty payloads, 1-byte payloads, multi-megabyte payloads, random high-entropy bytes (RAW fallback), unicode, and emojis.
-- **Envelope Headers:** Magic bytes, CRC32 checksum tampering detection, zip-bomb decompression limit guards.
-- **Database Operations:** Insert, retrieve, update, delete, SQLite custom UDF functions, and storage savings accounting.
-- **CLI & REST API:** File compress/decompress roundtrips, database commands, and HTTP microservice endpoints.
+All errors extend `LosslessPackError` with unique, machine-readable `code` properties:
 
-Run the test suite with:
-```bash
-python run.py --test
-```
-
-Output:
-```text
-Ran 22 tests in 0.483s
-OK
-```
+| Error Class | Code | Cause |
+| :--- | :--- | :--- |
+| `InvalidMagicError` | `ERR_INVALID_MAGIC` | Container does not start with `"LLP1"`. |
+| `UnsupportedVersionError` | `ERR_UNSUPPORTED_VERSION` | Format version is greater than 1. |
+| `CorruptHeaderError` | `ERR_CORRUPT_HEADER` | Header CRC-32 checksum failed. |
+| `ChecksumMismatchError` | `ERR_CHECKSUM_MISMATCH` | Decompressed payload SHA-256 or length does not match header. |
+| `SizeLimitExceededError` | `ERR_SIZE_LIMIT_EXCEEDED` | Payload claims size exceeding `maxDecompressedSize` (zip-bomb defense). |
+| `TruncatedDataError` | `ERR_TRUNCATED_DATA` | Input stream ended prematurely. |
+| `AlgorithmUnavailableError` | `ERR_ALGORITHM_UNAVAILABLE` | Requested native algorithm binding is missing. |
 
 ---
 
-## 📁 Repository Structure
-
-```text
-Master_Compressor/
-├── master_compressor/             # Core Python Engine
-│   ├── algorithms/                # Compression algorithms (Zlib, Gzip, BZ2, LZMA, RLE-Delta)
-│   ├── database/                  # SQLite adapter, KV store, and base interfaces
-│   ├── core.py                    # MasterCompressor core class & envelope serialization
-│   ├── cli.py                     # Command-line interface
-│   └── server.py                  # HTTP REST API server
-├── tests/                         # Comprehensive Unit & Integration Tests
-│   ├── test_algorithms.py
-│   ├── test_core_envelope.py
-│   ├── test_data_types.py
-│   ├── test_database.py
-│   └── test_cli_server.py
-├── .github/workflows/             # GitHub Actions CI & Pages Deployment
-│   ├── test.yml                   # Automated Multi-OS Python matrix tests
-│   └── pages.yml                  # Automated GitHub Pages deploy
-├── index.html                     # Live Interactive Web Dashboard & Studio
-├── styles.css                     # Executive responsive styling & themes
-├── app.js                         # Web compression engine & IndexedDB manager
-├── run.py                         # Unified runner script
-├── requirements.txt               # Dependencies
-└── README.md                      # Documentation
-```
+## 📚 Documentation Links
+- [Container Format Specification (docs/FORMAT.md)](docs/FORMAT.md)
+- [Supabase & PostgreSQL Architecture Guide (docs/SUPABASE.md)](docs/SUPABASE.md)
+- [Recommended PostgreSQL Migration (supabase/migrations/)](supabase/migrations/)
+- [Executable Code Examples (examples/)](examples/)
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+MIT License. Copyright (c) 2026 IG-Creation.

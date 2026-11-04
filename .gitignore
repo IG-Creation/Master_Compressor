@@ -1,4 +1,10 @@
-﻿# Byte-compiled / optimized / DLL files
+# Node & Dependencies
+node_modules/
+dist/
+coverage/
+*.tmp.*
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -7,24 +13,8 @@ __pycache__/
 *.so
 
 # Distribution / packaging
-.Python
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
 
 # Virtual environments
 venv/
@@ -35,7 +25,6 @@ ENV/
 *.db
 *.sqlite
 *.sqlite3
-*.mc
 
 # IDEs
 .vscode/
